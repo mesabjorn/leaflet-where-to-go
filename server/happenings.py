@@ -1,0 +1,27 @@
+import os
+import pymongo
+from flask import jsonify
+from bson.objectid import ObjectId
+
+collection = 'playground'
+DATABASE_URL = os.environ['MONGO_DB']  # get connection url from environment
+# establish connection with database
+client = pymongo.MongoClient(DATABASE_URL)
+mongo_db = client[collection]  # assign database to mongo_db
+
+def get_happening(_id):
+    result = mongo_db.happenings.find_one({'_id': ObjectId(_id)})
+    print(result)
+    if(result):
+        result['_id'] = str(result['_id'])
+        return jsonify(result)
+    else:
+        return f"No course found with id: '{_id}'."
+
+
+def get_happenings():
+    result = []
+    for r in mongo_db.happenings.find():
+        r['_id'] = str(r['_id'])
+        result.append(r)
+    return jsonify(result)
