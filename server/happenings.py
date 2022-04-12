@@ -9,6 +9,7 @@ DATABASE_URL = os.environ['MONGO_DB']  # get connection url from environment
 client = pymongo.MongoClient(DATABASE_URL)
 mongo_db = client[collection]  # assign database to mongo_db
 
+
 def get_happening(_id):
     result = mongo_db.happenings.find_one({'_id': ObjectId(_id)})
     print(result)
@@ -25,3 +26,9 @@ def get_happenings():
         r['_id'] = str(r['_id'])
         result.append(r)
     return jsonify(result)
+
+
+def add_happening(happening):
+    result = mongo_db.happenings.insert_one(happening)
+    print(result)
+    return result.inserted_id

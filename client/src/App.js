@@ -11,7 +11,6 @@ import {Navbar,Nav,NavDropdown,Container,Button} from 'react-bootstrap';
 import { ToastContainer} from 'react-toastify';
 
 import {SkateMap} from "./components/skatemap.jsx";
-import {getHappenings} from "./services/happeningService.js";
 import {getCurrentUser,logout} from "./services/userService.js"
 import {LoginPage} from "./components/LoginPage.jsx"
 
@@ -83,32 +82,20 @@ const MyNavBar = (props) =>{
 
 
 function App() {
-
-  const [happeningData, setHappeningData]=useState([]);
   const [user,setUser]=useState({});
-
-  useEffect(()=>{
-    async function fetchData() {
-      const {data:happenings} = await getHappenings();
-      console.log({happenings});
-      setHappeningData(happenings);
-    }
-    fetchData();
-  },[]);
-
+ 
   useEffect(()=>{
     const user = getCurrentUser();    
     setUser(user);    
   },[]);
-
-  // console.log(parkData[0].features);
+  
   return (
   <Router>
     <MyNavBar user={user}/>
     <Container>
     <Routes>
       <Route path='/' exact element={<div>Home</div>}/>
-      <Route path='/map' element={<SkateMap parkData={happeningData} user={user}/>}/>
+      <Route path='/map' element={<SkateMap user={user}/>}/>
       <Route path='/login' element={<LoginPage/>}/>
     </Routes>
     <div>Footer</div>

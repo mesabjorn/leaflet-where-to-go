@@ -11,9 +11,9 @@ export function getHappenings(){
     return http.get(`/v1/api/happenings`);
 }
 
-export function addHappening(name,price,author,tags){
+export function addHappening(name,description,options,geometry,maxAttendees){
     // console.log({headers:axios.defaults.headers.common['x-auth-token']});
-    return http.post(`/v1/api/course`,{name,price,author,tags});
+    return http.post(`/v1/api/happening`,{name,description,options,geometry,maxAttendees});
 }
 
 export function updateHappening(id,name,price,author,tags){
