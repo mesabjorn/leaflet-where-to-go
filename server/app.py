@@ -34,26 +34,30 @@ def route_get_happenings():
 def route_get_happening(_id):
     return get_happening(_id)
 
+from jsonschema.exceptions import ValidationError
+
 
 @ app.route('/v1/api/happening', methods=['POST'])
 def route_add_happening(*args, **kwargs):    
     print("Received post request for happening!")    
     try:
-        happening = {'name': '', 'description': '',
-                     'options': 0, "geometry": [], "maxAttendees": 0}
+        # happening = {'name': '', 'description': '',
+        #              'options': 0, "geomtype": [], "maxAttendees": 0}
 
-        for k in happening.keys():
-            happening[k] = request.json[k]
+        # for k in happening.keys():
+        #     happening[k] = request.json[k]
 
-        happening["attendees"] = 0
+        # happening["attendees"] = 0        
         
+        # happening["maxAttendees"] = int(happening["maxAttendees"])
+        print(request.json)
+        happening = request.json
         happening["maxAttendees"] = happening["maxAttendees"] if len(happening["maxAttendees"]) else 0
-
-        happening["maxAttendees"] = int(happening["maxAttendees"])
         happening['timestamp'] = datetime.datetime.now()
 
         _id = add_happening(happening)
         return f"Happening added with id: {_id}"
-    except Exception as e:
-        print(e)
+    except ValidationError as e:
+        return f"'{e.path[0]}' was invalid: {e.message}", 400
+    except Exception as e:        
         return "Invalid request", 400

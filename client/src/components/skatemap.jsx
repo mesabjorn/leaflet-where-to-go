@@ -14,17 +14,16 @@ const skater = new Icon({
   });
 
 const AddMarker = ({addClickMarkers})=>{
-  const [position, setPosition] = useState(null)
+  const [position, setPosition] = useState(null);
 
   const map = useMapEvents({
       click({latlng}) {
       //   map.locate()            
           addClickMarkers({name:'testname',
                           desc:'test description',
-                          geometry:{
-                            type:"Point",
-                            position:{lat:latlng.lat,lng:latlng.lng}
-                          },
+                          geomType:"Point",
+                          lat:latlng.lat,
+                          lng:latlng.lng,                          
                           editing:true
                         });
       },
@@ -113,11 +112,9 @@ const HappeningForm = ({happening,submitEvent,closePopup})=>{
             onChange={()=>updateOptions("public")}
         />       
         </Form.Group>
-        <Button variant="primary" onClick={()=>{submitEvent(name,description,options,
-          [
-            happening.geometry.position.lat,
-            happening.geometry.position.lng
-          ],
+        <Button variant="primary" onClick={()=>{submitEvent(name,description,options,          
+            happening.lat,
+            happening.lng,          
           maxAttendees
           )}}>
             Submit
@@ -136,8 +133,8 @@ const HappeningPopup = ({happening,submitEvent,closeEvent}) =>{
   return(
   <Popup maxWidth={450} offset={[0,-30]}
     position={[
-      happening.geometry.position.lat,
-      happening.geometry.position.lng
+      happening.lat,
+      happening.lng
     ]}
     onClose={() => {
       closeEvent();
@@ -172,28 +169,31 @@ export const SkateMap = () => {
       fetchData();
     },[]);
   
-    // const [activeNewMarker, setActiveNewMarker] = useState(null);
-    const addNewHappening = async(name,description,options,locdata,maxAttendees)=>{      
-      const geometry = {type:"point",position:{lat:locdata[0],lng:locdata[1]}}
+    
+    const addNewHappening = async(name,description,options,lat,lng,maxAttendees)=>{      
+      const geomtype = "point";
       const newHappening = {
-          _id:happeningData.length+1,name,description,options,geometry,attendees:0,maxAttendees
+          _id:happeningData.length+1,name,description,options,geomtype,lat,lng,attendees:0,maxAttendees
       };            
       let editing=false;
       try{
-        if(editing){
-            // await updateCourse(_id,name,price,author,tags);            
-        }
+        if(editing){}
         else{
-            await addHappening(name,description,options,geometry,maxAttendees);
+            let{data}=await addHappening(newHappening);
             
             let temp = [...happeningData,newHappening];
             setHappeningData(temp);
             setActiveHappening(null);
+            console.log(data);
             toast.success("Happening was added.");
         }
       } catch(ex){
         console.log(ex.response);
         if(ex.response){
+            if(ex.response.status===400){
+              toast.error("Something went wrong, please check the input fields.");
+              toast.error(ex.response.data);
+            } 
             if(ex.response.status===401){
                 toast.error("Something went wrong. Please sign in again.");
             }                
@@ -221,8 +221,8 @@ export const SkateMap = () => {
       <Marker
         key={activeHappening._id}
         position={[
-            activeHappening.geometry.position.lat,
-            activeHappening.geometry.position.lng
+            activeHappening.lat,
+            activeHappening.lng
         ]}
         eventHandlers={{
         click: (e) => {
@@ -237,8 +237,8 @@ export const SkateMap = () => {
     <Marker
         key={h._id}
         position={[
-            h.geometry.position.lat,
-            h.geometry.position.lng
+            h.lat,
+            h.lng
         ]}
         eventHandlers={{
         click: (e) => {
@@ -249,24 +249,6 @@ export const SkateMap = () => {
         icon={skater}        
     />
     ))}
-
-    {/* {
-    clickMarkers.map((cm,i)=>{
-        console.log(i);
-        return <Marker
-        key={i}
-        position={[
-            cm.lat,cm.long            
-        ]}
-        eventHandlers={{
-        click: (e) => {
-            console.log('cm clicked', e);            
-        }
-        }}
-        // icon={skater}  
-    />
-    })
-    } */}
     <TileLayer
     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
     attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'

@@ -31,11 +31,10 @@ def get_happenings():
 
 
 def add_happening(happening):
-    result = validate(happening)
-    print(f"validation result: {result}.")
-    if result:
-        result = mongo_db.happenings.insert_one(happening)
-        print(result)
-        return result.inserted_id
-    else:
-        return False
+    
+    validate(happening)        
+    result = mongo_db.happenings.insert_one(happening)        
+    return result.inserted_id
+        
+    
+        

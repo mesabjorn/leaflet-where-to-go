@@ -3,31 +3,22 @@ from jsonschema.exceptions import ValidationError
 
 schema = {
     "type": "object",
-    "required": ["name","description","geometry"],
+    "required": ["name","description","lat","lng"],
     "properties": {
-        "name": {"type": "string", "pattern": "[a-zA-Z0-9!?#]{3,25}"},
-        "description": {"type": "string", "pattern": "[a-zA-Z0-9!?#.,]{5,255}"},
-        "geometry": {
-            "type": "object",
-            "properties": {
-                "type":{"type":"string"},
-                "position":{
-                    "type":"object",
-                    "properties": {
-                        "lat":{"type":"number"},
-                        "lng":{"type":"number"}
-                    }
-                }
-            }
-            }        
-    },
+        "name": {"type": "string", "pattern": "[a-zA-Z0-9!?#]","minLength":3,"maxLength":25},
+        "description": {"type": "string", "pattern": "[a-zA-Z0-9!?#.,]","minLength":5,"maxLength":255},
+        "geomtype": {"type":"string","description":"type of marker (point,polygon etc)"},
+        "lat": {"type": "number","minimum":-90,"maximum":90},
+        "lng": {"type": "number","minimum":-180,"maximum":180},
+        "options": {"type": "array","maxItems":3},
+        "maxAttendees": {"type": "number","minimum":0}
+    }
 }
 
 
 def validate_happening(happening):    
     try:
-        validate(instance=happening, schema=schema)
-        return True
+        return validate(instance=happening, schema=schema)
+        # return True
     except ValidationError as e:
-        print(e)
-        return False
+        raise(e)        
