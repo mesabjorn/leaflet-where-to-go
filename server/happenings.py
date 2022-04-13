@@ -3,6 +3,8 @@ import pymongo
 from flask import jsonify
 from bson.objectid import ObjectId
 
+from models.Happening import validate_happening as validate
+
 collection = 'playground'
 DATABASE_URL = os.environ['MONGO_DB']  # get connection url from environment
 # establish connection with database
@@ -29,6 +31,11 @@ def get_happenings():
 
 
 def add_happening(happening):
-    result = mongo_db.happenings.insert_one(happening)
-    print(result)
-    return result.inserted_id
+    result = validate(happening)
+    print(f"validation result: {result}.")
+    if result:
+        result = mongo_db.happenings.insert_one(happening)
+        print(result)
+        return result.inserted_id
+    else:
+        return False

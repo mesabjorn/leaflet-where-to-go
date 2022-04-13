@@ -7,7 +7,6 @@ from flask_cors import CORS, cross_origin
 
 from happenings import get_happenings, get_happening, add_happening
 
-
 app = Flask(__name__, static_folder='client/build', static_url_path='')
 cors = CORS(app)
 
@@ -37,11 +36,8 @@ def route_get_happening(_id):
 
 
 @ app.route('/v1/api/happening', methods=['POST'])
-def route_add_happening(*args, **kwargs):
-    # print(dir(request))
-    print("Received post request for happening!")
-    # print(request.headers)
-    print(request.json)
+def route_add_happening(*args, **kwargs):    
+    print("Received post request for happening!")    
     try:
         happening = {'name': '', 'description': '',
                      'options': 0, "geometry": [], "maxAttendees": 0}
@@ -50,6 +46,9 @@ def route_add_happening(*args, **kwargs):
             happening[k] = request.json[k]
 
         happening["attendees"] = 0
+        
+        happening["maxAttendees"] = happening["maxAttendees"] if len(happening["maxAttendees"]) else 0
+
         happening["maxAttendees"] = int(happening["maxAttendees"])
         happening['timestamp'] = datetime.datetime.now()
 
