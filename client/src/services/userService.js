@@ -2,31 +2,16 @@ import http from './httpService';
 import jwtDecode from 'jwt-decode';
 import { toast } from 'react-toastify';
 
-
 const tokenKey="token"; 
-
-export function addCourse(name,price,author,tags){
-    // console.log({headers:axios.defaults.headers.common['x-auth-token']});
-    return http.post(`/api/course`,{name,price,author,tags});
-}
-
-export function updateCourse(id,name,price,author,tags){
-    // console.log({headers:axios.defaults.headers.common['x-auth-token']});
-    return http.put(`/api/course/${id}`,{name,price,author,tags});
-}
-
-export function deleteCourse(id){
-    // console.log({headers:axios.defaults.headers.common['x-auth-token']});
-    return http.delete(`/api/course/${id}`);
-}
 
 //auth
 export async function login(username,password){
     try{
-        const {data:jwt} = await http.post(`/api/user/login`,{username,password});    
+        const {data:jwt} = await http.post(`/api/v1/user/login`,{username,password});    
         localStorage.setItem(tokenKey,jwt);
         http.setJWT(jwt);        
-        window.location="/";
+        window.location="/map";
+        toast.success(`Welcome back, ${username}!`)
     } catch(ex){
         if(ex.response)
             if(ex.response.status===404){

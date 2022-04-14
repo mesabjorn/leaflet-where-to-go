@@ -126,8 +126,7 @@ const HappeningForm = ({happening,submitEvent,closePopup})=>{
     </>)
 }
 
-const HappeningPopup = ({happening,submitEvent,closeEvent}) =>{
-
+const HappeningPopup = ({user,happening,submitEvent,closeEvent}) =>{
   const [attendees,setAttendees] = useState(0);
 
   return(
@@ -141,22 +140,37 @@ const HappeningPopup = ({happening,submitEvent,closeEvent}) =>{
     }}
   >
 
-  {happening.editing?<HappeningForm happening={happening} submitEvent={submitEvent} closePopup={closeEvent}/>:
+  {
+    happening.editing?
+      <HappeningForm happening={happening} submitEvent={submitEvent} closePopup={closeEvent}/>
+      :
     (
     <div>
       <h2>{happening.name}</h2>
+      <h4><i>{happening.creator}</i>'s happening</h4>
       <p>{happening.description}</p>
       <p>{attendees} of {happening.maxAttendees} people are there!</p>
       <Button className="m-2" variant="primary" onClick={()=>setAttendees(attendees+1)}>
             I am here!
-        </Button>
+      </Button>
+      {user&&user.user===happening.creator &&
+      (<span>
+      <Button className="m-2" variant="secondary" onClick={()=>setAttendees(attendees+1)}>
+            Edit
+      </Button>
+      <Button className="m-2" variant="danger" onClick={()=>setAttendees(attendees+1)}>
+        Remove
+      </Button>
+      </span>
+        )
+      }
     </div>
     )
   }
   </Popup>);
 }
 
-export const SkateMap = () => {
+export const SkateMap = ({user}) => {
     const [activeHappening, setActiveHappening] = useState(null);
     // const [clickMarkers, setClickMarkers] = useState([]);
     const [happeningData, setHappeningData]=useState([]);
@@ -217,7 +231,7 @@ export const SkateMap = () => {
     <MapContainer center={[52.2190848, 5.1740672]} zoom={15}>    
     {activeHappening && (
       <>
-      <HappeningPopup happening={activeHappening} submitEvent={addNewHappening} closeEvent={()=>setActiveHappening(null)}/>
+      <HappeningPopup user={user} happening={activeHappening} submitEvent={addNewHappening} closeEvent={()=>setActiveHappening(null)}/>
       <Marker
         key={activeHappening._id}
         position={[
@@ -242,7 +256,6 @@ export const SkateMap = () => {
         ]}
         eventHandlers={{
         click: (e) => {
-            console.log('marker clicked', e);
             setActiveHappening(h);
         }
         }}

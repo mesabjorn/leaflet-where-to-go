@@ -2,10 +2,11 @@ import jwt
 import datetime
 import os
 
-from flask import Flask,  abort, request, send_from_directory
+from flask import Flask,  request, send_from_directory
 from flask_cors import CORS, cross_origin
 
 from happenings import get_happenings, get_happening, add_happening
+from auth import auth,check_auth
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
 cors = CORS(app)
@@ -13,6 +14,7 @@ cors = CORS(app)
 env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
 app.config.from_object(env_config)
 
+app.register_blueprint(auth)
 
 @app.route('/')
 def index():
@@ -38,21 +40,14 @@ from jsonschema.exceptions import ValidationError
 
 
 @ app.route('/v1/api/happening', methods=['POST'])
-def route_add_happening(*args, **kwargs):    
-    print("Received post request for happening!")    
+@check_auth()
+def route_add_happening(userdata):
+    print(userdata)
     try:
-        # happening = {'name': '', 'description': '',
-        #              'options': 0, "geomtype": [], "maxAttendees": 0}
-
-        # for k in happening.keys():
-        #     happening[k] = request.json[k]
-
-        # happening["attendees"] = 0        
-        
-        # happening["maxAttendees"] = int(happening["maxAttendees"])
         print(request.json)
         happening = request.json
-        happening["maxAttendees"] = happening["maxAttendees"] if len(happening["maxAttendees"]) else 0
+        happening['creator']=userdata['user']
+        happening["maxAttendees"] = int(happening["maxAttendees"]) if len(happening["maxAttendees"]) else 0
         happening['timestamp'] = datetime.datetime.now()
 
         _id = add_happening(happening)
