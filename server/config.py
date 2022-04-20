@@ -9,8 +9,6 @@ class Config:
     CSRF_ENABLED = True
     SECRET_KEY = os.getenv("SECRET_KEY", "this-is-the-default-key")
     MONGO_URL = os.environ['MONGO_DB']
-    BJORN_PW = os.environ['BJORN_PW']
-    THIJS_PW = os.environ['THIJS_PW']
 
 
 
