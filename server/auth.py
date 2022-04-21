@@ -20,6 +20,10 @@ users = {
     "thijs":
     {
         "role":ROLES.USER
+    },
+    "micha":
+    {
+        "role":ROLES.USER
     }
 }
 

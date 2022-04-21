@@ -130,7 +130,7 @@ const HappeningPopup = ({user,happening,submitEvent,closeEvent}) =>{
   const [attendees,setAttendees] = useState(0);
 
   return(
-  <Popup maxWidth={450} offset={[0,-30]}
+  <Popup minWidth="300" offset={[0,-30]}
     position={[
       happening.lat,
       happening.lng

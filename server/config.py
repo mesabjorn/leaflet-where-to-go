@@ -11,6 +11,8 @@ class Config:
     MONGO_URL = os.environ['MONGO_DB']
     BJORN_PW = os.environ['BJORN_PW']
     THIJS_PW = os.environ['THIJS_PW']
+    MICHA_PW = os.environ['MICHA_PW']
+
 
 
 
