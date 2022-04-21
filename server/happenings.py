@@ -35,6 +35,6 @@ def add_happening(happening):
     validate(happening)        
     result = mongo_db.happenings.insert_one(happening)        
     return result.inserted_id
-        
-    
+
+ 
         

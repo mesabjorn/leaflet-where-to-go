@@ -28,7 +28,6 @@ users = {
 }
 
 
-
 class AuthError(Exception):
     def __init__(self, level, required,
                  message="Required clearance level not met."):
@@ -63,20 +62,23 @@ def check_auth(level=ROLES.ADMIN):
     return dec_repeat
 
 
+from users import get_user_by_name
+from models.User import is_correct_password
 
 @auth.route('/login', methods=['POST'])
 @cross_origin()
 def route_user_login():
-    user = request.json['username']
+    username = request.json['username']
     password = request.json['password']
 
-    if user in users.keys():
-        if password == current_app.config.get(f"{user.upper()}_PW"):
-            return jwt.encode({"user": user, "role": users[user]["role"]}, current_app.config.get("SECRET_KEY"), algorithm="HS256")
-        else:
-            return "Invalid password", 401
+    user = get_user_by_name(username)
+    if not user:
+        return "User not found", 404    
+    if is_correct_password(user['password'], password):
+        return jwt.encode({"user":user['name'],"role":user['role']}, current_app.config.get("SECRET_KEY"), algorithm="HS256")
+    else:
+        return "Invalid password", 401
 
-    return "User not found", 404
 
 def router_user_register():
     pass
