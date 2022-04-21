@@ -19,12 +19,13 @@ const AddMarker = ({addClickMarkers})=>{
   const map = useMapEvents({
       click({latlng}) {
       //   map.locate()            
-          addClickMarkers({name:'testname',
-                          desc:'test description',
+          addClickMarkers({name:'',
+                          desc:'',
                           geomType:"Point",
                           lat:latlng.lat,
                           lng:latlng.lng,                          
-                          editing:true
+                          editing:true,
+                          options:[]
                         });
       },
       // locationfound(e) {
@@ -53,12 +54,10 @@ function LocationMarker() {
 }
 
 const HappeningForm = ({happening,submitEvent,closePopup})=>{
-
   const [name,setName] = useState("");
   const [description,setDescription] = useState("");
   const [options,setOptions] = useState([]);
   const [maxAttendees,setMaxAttendees] = useState("");
-
 
   const updateOptions = (t) =>{        
     const currentOptions = [...options];
@@ -69,7 +68,14 @@ const HappeningForm = ({happening,submitEvent,closePopup})=>{
         currentOptions.push(t);
     }
     setOptions(currentOptions);
-  }    
+  }
+  
+  useEffect(()=>{
+    let h ={...happening};
+    setName(h.name);
+    setDescription(h.description);
+
+  },[happening])
 
   return(
     <>
@@ -126,8 +132,9 @@ const HappeningForm = ({happening,submitEvent,closePopup})=>{
     </>)
 }
 
-const HappeningPopup = ({user,happening,submitEvent,closeEvent}) =>{
+const HappeningPopup = ({user,happening,submitEvent,closeEvent,setIsEditing}) =>{
   const [attendees,setAttendees] = useState(0);
+
 
   return(
   <Popup minWidth="300" offset={[0,-30]}
@@ -155,7 +162,7 @@ const HappeningPopup = ({user,happening,submitEvent,closeEvent}) =>{
       </Button>
       {user&&user.user===happening.creator &&
       (<span>
-      <Button className="m-2" variant="secondary" onClick={()=>setAttendees(attendees+1)}>
+      <Button className="m-2" variant="secondary" onClick={()=>setIsEditing(true)}>
             Edit
       </Button>
       <Button className="m-2" variant="danger" onClick={()=>setAttendees(attendees+1)}>
@@ -175,6 +182,12 @@ export const SkateMap = ({user}) => {
     // const [clickMarkers, setClickMarkers] = useState([]);
     const [happeningData, setHappeningData]=useState([]);
     
+    const setIsEditing = () =>{
+      let h = {...activeHappening};
+      h.editing=true;
+      setActiveHappening(h);
+    }
+
     useEffect(()=>{
       async function fetchData() {
         const {data:happenings} = await getHappenings();        
@@ -182,18 +195,19 @@ export const SkateMap = ({user}) => {
       }
       fetchData();
     },[]);
-  
     
     const addNewHappening = async(name,description,options,lat,lng,maxAttendees)=>{      
       const geomtype = "point";
       const newHappening = {
-          _id:happeningData.length+1,name,description,options,geomtype,lat,lng,attendees:0,maxAttendees
+          _id:happeningData.length+1,name,description,options,geomtype,lat,lng,attendees:0,maxAttendees,creator:user.user
       };            
-      let editing=false;
+      let editing = false;
       try{
-        if(editing){}
+        if(editing){
+          //should perform put instead of
+        }
         else{
-            let{data}=await addHappening(newHappening);
+            let {data} = await addHappening(newHappening);
             
             let temp = [...happeningData,newHappening];
             setHappeningData(temp);
@@ -221,17 +235,19 @@ export const SkateMap = ({user}) => {
     }
     } 
     
-    const addClickMarkers = (m) =>{        
+    const addClickMarkers = (m) =>{
+        console.log(m);    
         setActiveHappening(m);
     }
 
+ 
 
     return(
     <>
     <MapContainer center={[52.2190848, 5.1740672]} zoom={15}>    
     {activeHappening && (
       <>
-      <HappeningPopup user={user} happening={activeHappening} submitEvent={addNewHappening} closeEvent={()=>setActiveHappening(null)}/>
+      <HappeningPopup user={user} happening={activeHappening} submitEvent={addNewHappening} closeEvent={()=>setActiveHappening(null)} setIsEditing={setIsEditing}/>
       <Marker
         key={activeHappening._id}
         position={[

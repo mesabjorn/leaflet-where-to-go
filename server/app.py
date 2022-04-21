@@ -42,10 +42,8 @@ from jsonschema.exceptions import ValidationError
 
 @ app.route('/v1/api/happening', methods=['POST'])
 @check_auth()
-def route_add_happening(userdata):
-    print(userdata)
-    try:
-        print(request.json)
+def route_add_happening(userdata):    
+    try:        
         happening = request.json
         happening['creator']=userdata['user']
         happening["maxAttendees"] = int(happening["maxAttendees"]) if len(happening["maxAttendees"]) else 0
@@ -62,6 +60,7 @@ def route_add_happening(userdata):
 
 @ app.route('/v1/api/user', methods=['POST'])
 def route_add_user():    
+    """ Registers a new user """
     try:
         print(request.json)
         user={"name":request.json["name"],"password":request.json["password"]}

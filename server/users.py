@@ -20,14 +20,14 @@ def add_user(user):
     validate(user)
 
     existing_user = get_user_by_name(user['name'])
-    print(f"user=object:{isinstance(existing_user,object)}")
+    print(f"user = object:{isinstance(existing_user,object)}")
     print(existing_user)
     print(type(existing_user))
-    if isinstance(existing_user,object):
+    if existing_user!=None:
         raise(UserExistsError())
 
-    hashed = hash_new_password(user["password"])
-    user['password'] = hashed
+    
+    user['password'] = hash_new_password(user["password"])
     user['role']='user'
     result = mongo_db.users.insert_one(user)
     return result.inserted_id

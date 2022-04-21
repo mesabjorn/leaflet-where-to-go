@@ -5,29 +5,6 @@ import jwt
 
 auth = Blueprint('auth', __name__,url_prefix="/api/v1/user")
 
-class UserRoles:
-    ADMIN = 0
-    AUTHOR = 1
-    USER = 2
-
-ROLES = UserRoles()
-
-users = {
-    "bjorn":
-    {
-        "role": ROLES.ADMIN
-    },
-    "thijs":
-    {
-        "role":ROLES.USER
-    },
-    "micha":
-    {
-        "role":ROLES.USER
-    }
-}
-
-
 class AuthError(Exception):
     def __init__(self, level, required,
                  message="Required clearance level not met."):
@@ -38,7 +15,7 @@ class AuthError(Exception):
         super().__init__(self.message)
 
 
-def check_auth(level=ROLES.ADMIN):
+def check_auth(level=["admin","author"]):
     def dec_repeat(func):
         @wraps(func)
         def inner(*args, **kwargs):
@@ -47,7 +24,8 @@ def check_auth(level=ROLES.ADMIN):
                 if token:
                     userdata = jwt.decode(token, current_app.config.get(
                         "SECRET_KEY"), algorithms="HS256")
-                    if(int(userdata["role"]) > level):
+                    print({"level":level,"role":userdata['role'],"passes":userdata['role']in level})
+                    if(userdata["role"] not in level):
                         raise AuthError(userdata['role'], level)
                 else:
                     raise jwt.InvalidSignatureError

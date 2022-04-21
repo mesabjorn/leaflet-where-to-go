@@ -30,8 +30,7 @@ def get_happenings():
     return jsonify(result)
 
 
-def add_happening(happening):
-    
+def add_happening(happening):    
     validate(happening)        
     result = mongo_db.happenings.insert_one(happening)        
     return result.inserted_id
