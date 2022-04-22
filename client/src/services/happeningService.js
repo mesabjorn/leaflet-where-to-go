@@ -16,9 +16,9 @@ export function addHappening({name,description,options,geomtype,lat,lng,maxAtten
     return http.post(`/v1/api/happening`,{name,description,options,geomtype,lat,lng,maxAttendees});
 }
 
-export function updateHappening(id,name,price,author,tags){
+export function updateHappening(_id,{name,lat,lng,description,options,maxAttendees}){
     // console.log({headers:axios.defaults.headers.common['x-auth-token']});
-    return http.put(`/api/course/${id}`,{name,price,author,tags});
+    return http.put(`/v1/api/happening/${_id}`,{name,lat,lng,description,options,maxAttendees});
 }
 
 export function deleteHappening(id){

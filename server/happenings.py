@@ -17,7 +17,7 @@ def get_happening(_id):
     print(result)
     if(result):
         result['_id'] = str(result['_id'])
-        return jsonify(result)
+        return result
     else:
         return f"No course found with id: '{_id}'."
 
@@ -33,7 +33,14 @@ def get_happenings():
 def add_happening(happening):    
     validate(happening)        
     result = mongo_db.happenings.insert_one(happening)        
-    return result.inserted_id
+    return jsonify(str(result.inserted_id))
 
+def update_happening(_id,happening):    
+    validate(happening)
+    result = mongo_db.happenings.find_one_and_update({
+        '_id': ObjectId(_id)},
+        {'$set': happening}
+        )    
+    return jsonify(str(result['_id']))
  
         

@@ -27,6 +27,7 @@ def check_auth(level=["admin","author"]):
                     print({"level":level,"role":userdata['role'],"passes":userdata['role']in level})
                     if(userdata["role"] not in level):
                         raise AuthError(userdata['role'], level)
+                    kwargs['userdata']=userdata
                 else:
                     raise jwt.InvalidSignatureError
             except jwt.InvalidSignatureError:
@@ -35,7 +36,7 @@ def check_auth(level=["admin","author"]):
             except AuthError:
                 print("Auth error for user.")
                 abort(403)
-            return func(userdata)
+            return func(*args,**kwargs)
         return inner
     return dec_repeat
 

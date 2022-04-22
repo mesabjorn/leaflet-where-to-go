@@ -1,11 +1,12 @@
 import datetime
 import os
 
-from flask import Flask,  request, send_from_directory
+from flask import Flask, jsonify,  request, send_from_directory
 from flask_cors import CORS, cross_origin
 
-from happenings import get_happenings, get_happening, add_happening
+from happenings import get_happenings, get_happening, add_happening,update_happening
 from auth import auth,check_auth
+
 
 from users import add_user,UserExistsError
 
@@ -42,20 +43,42 @@ from jsonschema.exceptions import ValidationError
 
 @ app.route('/v1/api/happening', methods=['POST'])
 @check_auth()
-def route_add_happening(userdata):    
+def route_add_happening(*args,**kwargs):
+    userdata = kwargs['userdata']
     try:        
         happening = request.json
         happening['creator']=userdata['user']
         happening["maxAttendees"] = int(happening["maxAttendees"]) if len(happening["maxAttendees"]) else 0
         happening['timestamp'] = datetime.datetime.now()
 
-        _id = add_happening(happening)
-        return f"Happening added with id: {_id}"
+        return add_happening(happening)
+        
     except ValidationError as e:
         return f"'{e.path[0]}' was invalid: {e.message}", 400
     except Exception as e:        
         return "Invalid request", 400
 
+@ app.route('/v1/api/happening/<_id>', methods=['PUT'])
+@check_auth()
+def route_update_happening(*args,**kwargs):
+    userdata = kwargs['userdata']    
+    print(kwargs)
+    try:
+        _id = kwargs['_id']
+        existing_happening = get_happening(_id)
+        if(existing_happening['creator']!=userdata['user']):
+            return "Unauthorized",403
+        
+        happening = request.json    
+        
+        happening["maxAttendees"] = int(happening["maxAttendees"]) if len(happening["maxAttendees"]) else 0
+        _id = update_happening(_id,happening)
+        return _id
+    except ValidationError as e:
+        return f"'{e.path[0]}' was invalid: {e.message}", 400
+    except Exception as e:
+        print(e)    
+        return "Invalid request", 400
 
 
 @ app.route('/v1/api/user', methods=['POST'])

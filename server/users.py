@@ -18,11 +18,7 @@ class UserExistsError(Exception):
 
 def add_user(user):    
     validate(user)
-
-    existing_user = get_user_by_name(user['name'])
-    print(f"user = object:{isinstance(existing_user,object)}")
-    print(existing_user)
-    print(type(existing_user))
+    existing_user = get_user_by_name(user['name'])    
     if existing_user!=None:
         raise(UserExistsError())
 

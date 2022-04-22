@@ -3,10 +3,11 @@ import React, {useState,useEffect} from "react";
 import { MapContainer, TileLayer, Marker, Popup,useMapEvents} from 'react-leaflet';
 import { Icon } from "leaflet";
 import {Button,Form} from 'react-bootstrap';
-import {getHappenings,addHappening} from "../services/happeningService.js";
+import {getHappenings,addHappening,updateHappening} from "../services/happeningService.js";
 import { toast } from 'react-toastify';
 
 import {Fab} from './fab.jsx'
+
 
 const skater = new Icon({
     iconUrl: "./skateboarding.png",
@@ -74,6 +75,8 @@ const HappeningForm = ({happening,submitEvent,closePopup})=>{
     let h ={...happening};
     setName(h.name);
     setDescription(h.description);
+    setMaxAttendees(h.maxAttendees);
+    setOptions(h.options);
 
   },[happening])
 
@@ -118,7 +121,7 @@ const HappeningForm = ({happening,submitEvent,closePopup})=>{
             onChange={()=>updateOptions("public")}
         />       
         </Form.Group>
-        <Button variant="primary" onClick={()=>{submitEvent(name,description,options,          
+        <Button variant="primary" onClick={()=>{submitEvent(happening._id,name,description,options,          
             happening.lat,
             happening.lng,          
           maxAttendees
@@ -196,24 +199,43 @@ export const SkateMap = ({user}) => {
       fetchData();
     },[]);
     
-    const addNewHappening = async(name,description,options,lat,lng,maxAttendees)=>{      
+    const addNewHappening = async(_id,name,description,options,lat,lng,maxAttendees)=>{      
       const geomtype = "point";
-      const newHappening = {
-          _id:happeningData.length+1,name,description,options,geomtype,lat,lng,attendees:0,maxAttendees,creator:user.user
-      };            
-      let editing = false;
+      let newHappening = {
+          name,
+          description,
+          options,
+          geomtype,
+          lat,
+          lng,
+          attendees:0,
+          maxAttendees,
+          creator:user.user
+      };
+      
       try{
-        if(editing){
-          //should perform put instead of
+        if(activeHappening._id==="new"){          
+          let {data} = await addHappening(newHappening);
+          newHappening._id=data;
+          let temp = [...happeningData,newHappening];
+          setHappeningData(temp);
+          setActiveHappening(null);          
+          toast.success("Happening was added.");
         }
-        else{
-            let {data} = await addHappening(newHappening);
-            
-            let temp = [...happeningData,newHappening];
-            setHappeningData(temp);
-            setActiveHappening(null);
-            console.log(data);
-            toast.success("Happening was added.");
+        else{          
+          let {data:_id} = await updateHappening(activeHappening._id,newHappening);
+          const temp = [...happeningData];          
+          for(let i =0;i<temp.length;i++){
+            if(temp[i]._id===_id){
+
+              temp[i]=newHappening;
+              temp[i]._id=_id;
+              break;
+            }
+          }
+          setHappeningData(temp);
+          setActiveHappening(null);          
+          toast.success(`Happening with id: ${_id} was updated succesfully.`);
         }
       } catch(ex){
         console.log(ex.response);
@@ -226,7 +248,7 @@ export const SkateMap = ({user}) => {
                 toast.error("Something went wrong. Please sign in again.");
             }                
             else if(ex.response.status===403){
-                toast.error("You are not authorized to create or update courses. Requires admin.");
+                toast.error("You are not authorized to do this.");
             }
         }
         else{
@@ -236,7 +258,8 @@ export const SkateMap = ({user}) => {
     } 
     
     const addClickMarkers = (m) =>{
-        console.log(m);    
+        console.log(m);
+        m._id="new";
         setActiveHappening(m);
     }
 
@@ -247,7 +270,12 @@ export const SkateMap = ({user}) => {
     <MapContainer center={[52.2190848, 5.1740672]} zoom={15}>    
     {activeHappening && (
       <>
-      <HappeningPopup user={user} happening={activeHappening} submitEvent={addNewHappening} closeEvent={()=>setActiveHappening(null)} setIsEditing={setIsEditing}/>
+      <HappeningPopup 
+        user={user}
+        happening={activeHappening}
+        submitEvent={addNewHappening}
+        closeEvent={()=>setActiveHappening(null)}
+        setIsEditing={setIsEditing}/>
       <Marker
         key={activeHappening._id}
         position={[
@@ -256,7 +284,7 @@ export const SkateMap = ({user}) => {
         ]}
         eventHandlers={{
         click: (e) => {
-            console.log('marker clicked', e);            
+            console.log('marker clicked', e);        
         }
         }}      
       />
