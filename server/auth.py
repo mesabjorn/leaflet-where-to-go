@@ -1,7 +1,10 @@
+import jwt
 from functools import wraps
 from flask import abort, current_app, request,Blueprint
 from flask_cors import cross_origin
-import jwt
+
+from users import get_user_by_name
+from models.User import is_correct_password
 
 auth = Blueprint('auth', __name__,url_prefix="/api/v1/user")
 
@@ -41,8 +44,7 @@ def check_auth(level=["admin","author"]):
     return dec_repeat
 
 
-from users import get_user_by_name
-from models.User import is_correct_password
+
 
 @auth.route('/login', methods=['POST'])
 @cross_origin()
@@ -54,7 +56,7 @@ def route_user_login():
     if not user:
         return "User not found", 404    
     if is_correct_password(user['password'], password):
-        return jwt.encode({"user":user['name'],"role":user['role']}, current_app.config.get("SECRET_KEY"), algorithm="HS256")
+        return jwt.encode({"user":user['name'],"_id":str(user["_id"]),"role":user['role']}, current_app.config.get("SECRET_KEY"), algorithm="HS256")
     else:
         return "Invalid password", 401
 

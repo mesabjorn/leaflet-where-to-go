@@ -13,13 +13,12 @@ mongo_db = client[collection]  # assign database to mongo_db
 
 
 def get_happening(_id):
-    result = mongo_db.happenings.find_one({'_id': ObjectId(_id)})
-    print(result)
+    result = mongo_db.happenings.find_one({'_id': ObjectId(_id)})    
     if(result):
         result['_id'] = str(result['_id'])
         return result
     else:
-        return f"No course found with id: '{_id}'."
+        return False
 
 
 def get_happenings():
@@ -40,7 +39,15 @@ def update_happening(_id,happening):
     result = mongo_db.happenings.find_one_and_update({
         '_id': ObjectId(_id)},
         {'$set': happening}
-        )    
+        )  
+
+      
     return jsonify(str(result['_id']))
  
         
+def delete_happening(_id):
+    result = mongo_db.happenings.delete_one({
+        '_id': ObjectId(_id)}        
+        )
+    print(result)
+    return result.acknowledged

@@ -13,6 +13,7 @@ export function getHappenings(){
 
 export function addHappening({name,description,options,geomtype,lat,lng,maxAttendees}){
     // console.log({headers:axios.defaults.headers.common['x-auth-token']});
+    console.log(maxAttendees)
     return http.post(`/v1/api/happening`,{name,description,options,geomtype,lat,lng,maxAttendees});
 }
 
@@ -23,7 +24,7 @@ export function updateHappening(_id,{name,lat,lng,description,options,maxAttende
 
 export function deleteHappening(id){
     // console.log({headers:axios.defaults.headers.common['x-auth-token']});
-    return http.delete(`/api/course/${id}`);
+    return http.delete(`/v1/api/happening/${id}`);
 }
 
 //auth

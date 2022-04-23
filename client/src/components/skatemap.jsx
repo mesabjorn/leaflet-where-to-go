@@ -3,7 +3,7 @@ import React, {useState,useEffect} from "react";
 import { MapContainer, TileLayer, Marker, Popup,useMapEvents} from 'react-leaflet';
 import { Icon } from "leaflet";
 import {Button,Form} from 'react-bootstrap';
-import {getHappenings,addHappening,updateHappening} from "../services/happeningService.js";
+import {getHappenings,addHappening,updateHappening,deleteHappening} from "../services/happeningService.js";
 import { toast } from 'react-toastify';
 
 import {Fab} from './fab.jsx'
@@ -21,11 +21,12 @@ const AddMarker = ({addClickMarkers})=>{
       click({latlng}) {
       //   map.locate()            
           addClickMarkers({name:'',
-                          desc:'',
+                          description:'',
                           geomType:"Point",
                           lat:latlng.lat,
                           lng:latlng.lng,                          
                           editing:true,
+                          maxAttendees:0,
                           options:[]
                         });
       },
@@ -135,9 +136,8 @@ const HappeningForm = ({happening,submitEvent,closePopup})=>{
     </>)
 }
 
-const HappeningPopup = ({user,happening,submitEvent,closeEvent,setIsEditing}) =>{
+const HappeningPopup = ({user,happening,submitEvent,closeEvent,setIsEditing,deleteHappening}) =>{
   const [attendees,setAttendees] = useState(0);
-
 
   return(
   <Popup minWidth="300" offset={[0,-30]}
@@ -163,12 +163,12 @@ const HappeningPopup = ({user,happening,submitEvent,closeEvent,setIsEditing}) =>
       <Button className="m-2" variant="primary" onClick={()=>setAttendees(attendees+1)}>
             I am here!
       </Button>
-      {user&&user.user===happening.creator &&
+      {user&&user._id===happening.creator &&
       (<span>
       <Button className="m-2" variant="secondary" onClick={()=>setIsEditing(true)}>
             Edit
       </Button>
-      <Button className="m-2" variant="danger" onClick={()=>setAttendees(attendees+1)}>
+      <Button className="m-2" variant="danger" onClick={()=>deleteHappening(happening._id)}>
         Remove
       </Button>
       </span>
@@ -199,6 +199,18 @@ export const SkateMap = ({user}) => {
       fetchData();
     },[]);
     
+    const deleteActiveHappening = async(_id)=>{
+      let {data:deleted_id} = await deleteHappening(_id);
+      console.log(deleted_id);
+      let temp = [...happeningData];
+
+      temp = temp.filter((v)=>v._id!==deleted_id);
+
+      setHappeningData(temp);
+      setActiveHappening(null);          
+      toast.success("Happening was deleted.");
+    }    
+
     const addNewHappening = async(_id,name,description,options,lat,lng,maxAttendees)=>{      
       const geomtype = "point";
       let newHappening = {
@@ -210,13 +222,13 @@ export const SkateMap = ({user}) => {
           lng,
           attendees:0,
           maxAttendees,
-          creator:user.user
+          creator:user._id
       };
       
       try{
         if(activeHappening._id==="new"){          
           let {data} = await addHappening(newHappening);
-          newHappening._id=data;
+          newHappening._id = data;
           let temp = [...happeningData,newHappening];
           setHappeningData(temp);
           setActiveHappening(null);          
@@ -275,7 +287,9 @@ export const SkateMap = ({user}) => {
         happening={activeHappening}
         submitEvent={addNewHappening}
         closeEvent={()=>setActiveHappening(null)}
-        setIsEditing={setIsEditing}/>
+        setIsEditing={setIsEditing}
+        deleteHappening={deleteActiveHappening}
+        />
       <Marker
         key={activeHappening._id}
         position={[
