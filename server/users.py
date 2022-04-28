@@ -25,9 +25,8 @@ def add_user(user):
     
     user['password'] = hash_new_password(user["password"])
     user['role']='user'
-    result = mongo_db.users.insert_one(user)
-    return result.inserted_id
-    
+    user['_id'] = mongo_db.users.insert_one(user)
+    return user
 
 def get_user_by_name(name):
     user = mongo_db.users.find_one({"name":name})

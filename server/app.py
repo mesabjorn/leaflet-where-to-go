@@ -7,7 +7,6 @@ from jsonschema.exceptions import ValidationError
 
 from happenings import get_happenings, get_happening, add_happening,update_happening,delete_happening
 from auth import auth, check_auth
-from users import add_user,UserExistsError
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
 cors = CORS(app)
@@ -44,7 +43,7 @@ def route_add_happening(*args,**kwargs):
     try:        
         happening = request.json
         happening['creator'] = userdata['_id']
-        happening["maxAttendees"] = int(happening["maxAttendees"]) if len(happening["maxAttendees"]) else 0
+        happening["maxAttendees"] = int(happening['maxAttendees'])#int(happening["maxAttendees"]) if len(happening["maxAttendees"]) else 0
         happening['timestamp'] = datetime.datetime.now()
 
         return add_happening(happening)
@@ -105,20 +104,6 @@ def route_delete_happening(*args,**kwargs):
         print(e)    
         return "Invalid request", 400
 
-@ app.route('/v1/api/user', methods=['POST'])
-def route_add_user():    
-    """ Registers a new user """
-    try:
-        print(request.json)
-        user={"name":request.json["name"],"password":request.json["password"]}
-        _id = add_user(user)
-        return f"User added with id: {_id}"
-    except ValidationError as e:
-        print(e)
-        return f"'{e.path[0]}' was invalid: {e.message}", 400
-    except UserExistsError as e:
-        print(e)
-        return e.message,400
-    except Exception as e:
-        print(e)
-        return "Invalid request", 400
+# @ app.route('/v1/api/user', methods=['POST'])
+# def route_add_user():    
+    

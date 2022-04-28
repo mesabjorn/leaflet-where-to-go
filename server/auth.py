@@ -3,7 +3,8 @@ from functools import wraps
 from flask import abort, current_app, request,Blueprint
 from flask_cors import cross_origin
 
-from users import get_user_by_name
+from users import get_user_by_name, UserExistsError,add_user
+from models.User import validate_user as validate
 from models.User import is_correct_password
 
 auth = Blueprint('auth', __name__,url_prefix="/api/v1/user")
@@ -18,7 +19,7 @@ class AuthError(Exception):
         super().__init__(self.message)
 
 
-def check_auth(level=["admin","author"]):
+def check_auth(level=["admin","user"]):
     def dec_repeat(func):
         @wraps(func)
         def inner(*args, **kwargs):
@@ -27,7 +28,7 @@ def check_auth(level=["admin","author"]):
                 if token:
                     userdata = jwt.decode(token, current_app.config.get(
                         "SECRET_KEY"), algorithms="HS256")
-                    print({"level":level,"role":userdata['role'],"passes":userdata['role']in level})
+                    # print({"level":level,"role":userdata['role'],"passes":userdata['role']in level})
                     if(userdata["role"] not in level):
                         raise AuthError(userdata['role'], level)
                     kwargs['userdata']=userdata
@@ -61,5 +62,21 @@ def route_user_login():
         return "Invalid password", 401
 
 
-def router_user_register():
-    pass
+@auth.route('/register', methods=['POST'])
+@cross_origin()
+def route_user_register():
+    try:
+        username = request.json['username']
+        password = request.json['password']
+        
+        new_user = {"name":username,"password":password}
+        added_user = add_user(new_user)
+        return jwt.encode({"user":added_user['name'],"_id":str(added_user['_id']),"role":added_user['role']}, current_app.config.get("SECRET_KEY"), algorithm="HS256")
+    except UserExistsError as e:
+        print(e)
+        return "Username not available.", 400
+    except Exception as e:
+        print("Error registering new user", e)
+        return "An error occurred.", 500
+        
+    

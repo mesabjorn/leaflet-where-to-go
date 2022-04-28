@@ -26,7 +26,7 @@ const AddMarker = ({addClickMarkers})=>{
                           lat:latlng.lat,
                           lng:latlng.lng,                          
                           editing:true,
-                          maxAttendees:0,
+                          maxAttendees:"0",
                           options:[]
                         });
       },

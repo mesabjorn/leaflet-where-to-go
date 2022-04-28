@@ -31,17 +31,15 @@ def get_happenings():
 
 def add_happening(happening):    
     validate(happening)        
-    result = mongo_db.happenings.insert_one(happening)        
-    return jsonify(str(result.inserted_id))
+    result = mongo_db.happenings.insert_one(happening)
+    return str(result.inserted_id)
 
 def update_happening(_id,happening):    
     validate(happening)
     result = mongo_db.happenings.find_one_and_update({
         '_id': ObjectId(_id)},
         {'$set': happening}
-        )  
-
-      
+        )
     return jsonify(str(result['_id']))
  
         
@@ -49,5 +47,4 @@ def delete_happening(_id):
     result = mongo_db.happenings.delete_one({
         '_id': ObjectId(_id)}        
         )
-    print(result)
     return result.acknowledged

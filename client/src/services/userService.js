@@ -23,6 +23,26 @@ export async function login(username,password){
     }
 }
 
+export async function register(username,password){
+    try{
+        const {data:jwt} = await http.post(`/api/v1/user/register`,{username,password});
+        // console.log(data);
+        localStorage.setItem(tokenKey,jwt);
+        http.setJWT(jwt);        
+        window.location="/map";
+        toast.success(`Welcome, ${username}!`)
+    } catch(ex){
+        if(ex.response)
+            if(ex.response.status===400){
+                // console.log(ex.response);
+                toast.error(ex.response.data);
+            }
+            else if(ex.response.status===401){
+               toast.error("Invalid password.");
+            }        
+    }
+}
+
 export function loginWithJWT(jwt){    
     localStorage.setItem(tokenKey,jwt);
 }

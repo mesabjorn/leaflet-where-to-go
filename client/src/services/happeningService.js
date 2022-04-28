@@ -13,7 +13,7 @@ export function getHappenings(){
 
 export function addHappening({name,description,options,geomtype,lat,lng,maxAttendees}){
     // console.log({headers:axios.defaults.headers.common['x-auth-token']});
-    console.log(maxAttendees)
+    // console.log(maxAttendees)
     return http.post(`/v1/api/happening`,{name,description,options,geomtype,lat,lng,maxAttendees});
 }
 

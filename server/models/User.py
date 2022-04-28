@@ -7,8 +7,8 @@ schema = {
     "type": "object",
     "required": ["name","password"],
     "properties": {
-        "name": {"type": "string", "pattern": "[a-zA-Z0-9!?#]","minLength":3,"maxLength":24},
-        "password": {"type": "string", "pattern": "[a-zA-Z0-9!$*@?#.,]","minLength":6,"maxLength":255},
+        "name": {"type": "string", "pattern": "[a-zA-Z0-9!?#$@%^&*-_+=<>]","minLength":3,"maxLength":24},
+        "password": {"type": "string", "pattern": "[a-zA-Z0-9!%^&*()-=+_`~ $*@?#.,]","minLength":8,"maxLength":255},
     }
 }
 
